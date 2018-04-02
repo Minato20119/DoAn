@@ -21,9 +21,33 @@ public class ReceiveSite4 {
 	private static final String PATH_FILE_IMAGE_STEGO = "C:\\Users\\Minato\\Pictures\\Image\\output.png";
 
 	public static void main(String[] args) {
+		
 		BufferedImage image = inputImage(PATH_FILE_IMAGE_STEGO);
 		getValueRGB(image);
+		
 		System.out.println("CIPHER_TEXT: " + CIPHER_TEXT);
+		
+		String text = "";
+		
+		for (int i = 0; i <= CIPHER_TEXT.length(); i += 8) {
+			String word = "";
+			
+			if (i > 0) {
+				word = CIPHER_TEXT.substring(i - 8, i);
+				int charCode = convertBinaryToDecimal(word);
+				text += new Character((char) charCode).toString();
+			}
+		}
+		
+		System.out.println("Decode text: " + text);
+	}
+	
+	// Convert binary to decimal
+	private static int convertBinaryToDecimal(String binary) {
+
+		int decimal = Integer.parseInt(binary, 2);
+
+		return decimal;
 	}
 
 	private static BufferedImage inputImage(String pathFileImage) {
@@ -59,7 +83,9 @@ public class ReceiveSite4 {
 				}
 				getCipher(rgb);
 			}
-			break;
+			if (CIPHER_TEXT.length() >= 120) {
+				break;
+			}
 		}
 	}
 
@@ -69,12 +95,11 @@ public class ReceiveSite4 {
 		int green = (rgb >> 8) & 0xff;
 		int blue = rgb & 0xff;
 
-
 		// convert to binary
 		String redBinary = convertDecimalToBinary(red);
 		String greenBinary = convertDecimalToBinary(green);
 		String blueBinary = convertDecimalToBinary(blue);
-		
+
 		System.out.println("Red: " + redBinary);
 		System.out.println("Green: " + greenBinary);
 		System.out.println("Blue: " + blueBinary);

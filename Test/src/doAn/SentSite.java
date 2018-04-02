@@ -28,9 +28,9 @@ public class SentSite {
 
 			int count = 0;
 
-			for (int i = 0; i < 1000; i++) {
+			for (int i = 0; i < 3; i++) {
 
-				for (int j = 0; j < 1000; j++) {
+				for (int j = 0; j < 3; j++) {
 
 					count++;
 					Color c = new Color(image.getRGB(j, i));
@@ -38,6 +38,8 @@ public class SentSite {
 							+ c.getBlue());
 					
 					int color = image.getRGB(j, i);
+					
+					System.out.println(color);
 					
 					int blue = color & 0xff;
 					int green = (color & 0xff00) >> 8;
