@@ -33,7 +33,7 @@ public class RSAUtil {
 			X509EncodedKeySpec keySpec = new X509EncodedKeySpec(Base64.getDecoder().decode(base64PublicKey.getBytes()));
 			KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 			publicKey = keyFactory.generatePublic(keySpec);
-			System.out.println("Public key: " + publicKey);
+			// System.out.println("Public key: " + publicKey);
 			return publicKey;
 		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
@@ -57,8 +57,8 @@ public class RSAUtil {
 		} catch (InvalidKeySpecException e) {
 			e.printStackTrace();
 		}
-		
-		System.out.println("Private key: " + privateKey);
+
+		// System.out.println("Private key: " + privateKey);
 		return privateKey;
 	}
 
@@ -81,18 +81,36 @@ public class RSAUtil {
 		return decrypt(Base64.getDecoder().decode(data.getBytes()), getPrivateKey(base64PrivateKey));
 	}
 
-	public static void main(String[] args)
-			throws IllegalBlockSizeException, InvalidKeyException, NoSuchPaddingException, BadPaddingException {
-		try {
-			String encryptedString = Base64.getEncoder().encodeToString(encrypt("Hello Minato!", publicKey));
-			System.out.println("Encrypt: " + encryptedString);
-			
-			String decryptedString = RSAUtil.decrypt(encryptedString, privateKey);
-			System.out.println("Decrypt: " + decryptedString);
-			
-		} catch (NoSuchAlgorithmException e) {
-			System.err.println(e.getMessage());
-		}
+	// public static void main(String[] args)
+	// throws IllegalBlockSizeException, InvalidKeyException,
+	// NoSuchPaddingException, BadPaddingException {
+	// try {
+	// String encryptedString = Base64.getEncoder().encodeToString(encrypt("Hello
+	// Minato!", publicKey));
+	// System.out.println("Encrypt: " + encryptedString);
+	//
+	// String decryptedString = RSAUtil.decrypt(encryptedString, privateKey);
+	// System.out.println("Decrypt: " + decryptedString);
+	//
+	// } catch (NoSuchAlgorithmException e) {
+	// System.err.println(e.getMessage());
+	// }
+	//
+	// }
 
+	// set text to encrypt
+	public static String getTextToEncrypt(String text) throws InvalidKeyException, BadPaddingException,
+			IllegalBlockSizeException, NoSuchPaddingException, NoSuchAlgorithmException {
+		String encryptedString = Base64.getEncoder().encodeToString(encrypt(text, publicKey));
+
+		return encryptedString;
+	}
+
+	// get text to decrypt
+	public static String getTextToDecrypt(String textEncrypted) throws InvalidKeyException, IllegalBlockSizeException,
+			BadPaddingException, NoSuchAlgorithmException, NoSuchPaddingException {
+		String decryptedString = RSAUtil.decrypt(textEncrypted, privateKey);
+
+		return decryptedString;
 	}
 }

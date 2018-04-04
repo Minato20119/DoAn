@@ -8,7 +8,12 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import javax.imageio.ImageIO;
 
 /**
@@ -30,11 +35,31 @@ public class SentSite {
 
 	public static void main(String[] args) {
 
+		// Get text from file
 		String text = inputTextFile();
-		String textBinary = convertTextToBinary(text);
+
+		// Get text encrypted
+		String textEncrypted = "";
+
+		try {
+			textEncrypted = RSAUtil.getTextToEncrypt(text);
+		} catch (InvalidKeyException | BadPaddingException | IllegalBlockSizeException | NoSuchPaddingException
+				| NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+
+		System.out.println("Text Encrypted: " + textEncrypted);
+
+		// ConvertStringEncryptedToBinary
+		String textBinary = convertTextToBinary(textEncrypted);
+
 		image = inputImage(PATH_FILE_IMAGE);
+
 		getValueRGB(textBinary);
+
 		writeNewImage();
+
+		System.out.println("Write new image done!");
 	}
 
 	private static BufferedImage inputImage(String pathFileImage) {
@@ -115,7 +140,7 @@ public class SentSite {
 		return binary.toString();
 	}
 
-	private static void getValueRGB(String cipherText) {
+	private static void getValueRGB(String binaryString) {
 
 		int height = image.getHeight();
 		int width = image.getWidth();
@@ -130,26 +155,26 @@ public class SentSite {
 				rgb = image.getRGB(j, i);
 
 				//
-				if (increase >= cipherText.length()) {
+				if (increase >= binaryString.length()) {
 					System.out.println("i: " + i + " | j: " + j);
 					break;
 				}
 
 				// Set new rgb
-				int rgbNew = setNewRGB(rgb, cipherText);
+				int rgbNew = setNewRGB(rgb, binaryString);
 				image.setRGB(j, i, rgbNew);
 			}
 
 			//
-			if (increase >= cipherText.length()) {
+			if (increase >= binaryString.length()) {
 				break;
 			}
 		}
 	}
 
-	private static int setNewRGB(int rgb, String cipherText) {
+	private static int setNewRGB(int rgb, String binaryString) {
 
-		System.out.println("============= Set New RGB =======================");
+		// System.out.println("============= Set New RGB =======================");
 
 		int red = (rgb >> 16) & 0xff;
 		int green = (rgb >> 8) & 0xff;
@@ -160,27 +185,27 @@ public class SentSite {
 		String greenBinary = convertDecimalToBinary(green);
 		String blueBinary = convertDecimalToBinary(blue);
 
-		System.out.println("RedBinary  : " + redBinary);
-		System.out.println("GreenBinary: " + greenBinary);
-		System.out.println("BlueBinary : " + blueBinary);
+		// System.out.println("RedBinary : " + redBinary);
+		// System.out.println("GreenBinary: " + greenBinary);
+		// System.out.println("BlueBinary : " + blueBinary);
 
-		System.out.println("============= Red: add CipherToBit ==============");
-		int redNew = addCipherToBit(redBinary, cipherText);
-		System.out.println("============= changeRed =========================");
+		// System.out.println("============= Red: add CipherToBit ==============");
+		int redNew = addCipherToBit(redBinary, binaryString);
+		// System.out.println("============= changeRed =========================");
 		int redChanged = changeRed(red, redNew);
 
-		System.out.println("============= Blue: add CipherToBit =============");
-		int blueNew = addCipherToBit(blueBinary, cipherText);
-		System.out.println("============= changeBlue ========================");
+		// System.out.println("============= Blue: add CipherToBit =============");
+		int blueNew = addCipherToBit(blueBinary, binaryString);
+		// System.out.println("============= changeBlue ========================");
 		int blueChanged = changeBlue(blue, blueNew);
 
-		System.out.println("============= changeGreen =======================");
+		// System.out.println("============= changeGreen =======================");
 		int greenChanged = changeGreen(greenBinary, red, redNew, blue, blueNew);
 
 		// Reset check green to change
 		checkGreenToChange = 0;
 
-		System.out.println();
+//		System.out.println();
 
 		rgb = (redChanged << 16) | (greenChanged << 8) | blueChanged;
 
@@ -208,11 +233,11 @@ public class SentSite {
 
 		String getCipher = cipherText.substring(increase, increase + NUMBER_BLOCK_CIPHER);
 
-		System.out.println("Cipher: " + getCipher);
+		// System.out.println("Cipher: " + getCipher);
 
 		String rgbChanged = rgbBinary.substring(0, NUMBER_BLOCK_CIPHER) + getCipher;
 
-		System.out.println("rgbChanged: " + rgbChanged);
+		// System.out.println("rgbChanged: " + rgbChanged);
 
 		int rgbNew = convertBinaryToDecimal(rgbChanged);
 
@@ -224,24 +249,28 @@ public class SentSite {
 
 		// 00
 		if (checkGreenToChange == 1) {
-			System.out.println("GreenChanged: " + greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "00");
+			// System.out.println("GreenChanged: " + greenBinary.substring(0,
+			// NUMBER_BLOCK_CIPHER_INDICATOR) + "00");
 			return convertBinaryToDecimal(greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "00");
 		}
 
 		// 01
 		if (checkGreenToChange == 2) {
-			System.out.println("GreenChanged: " + greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "01");
+			// System.out.println("GreenChanged: " + greenBinary.substring(0,
+			// NUMBER_BLOCK_CIPHER_INDICATOR) + "01");
 			return convertBinaryToDecimal(greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "01");
 		}
 
 		// 10
 		if (checkGreenToChange == 3) {
-			System.out.println("GreenChanged: " + greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "10");
+			// System.out.println("GreenChanged: " + greenBinary.substring(0,
+			// NUMBER_BLOCK_CIPHER_INDICATOR) + "10");
 			return convertBinaryToDecimal(greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "10");
 		}
 
 		// 11
-		System.out.println("GreenChanged: " + greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "11");
+		// System.out.println("GreenChanged: " + greenBinary.substring(0,
+		// NUMBER_BLOCK_CIPHER_INDICATOR) + "11");
 		return convertBinaryToDecimal(greenBinary.substring(0, NUMBER_BLOCK_CIPHER_INDICATOR) + "11");
 	}
 
@@ -265,10 +294,11 @@ public class SentSite {
 	// Check RGB to change
 	private static int changeRed(int red, int redNew) {
 
-		System.out.println("Red: " + red + " RedNew: " + redNew + " Result: " + Math.abs(red - redNew));
+		// System.out.println("Red: " + red + " RedNew: " + redNew + " Result: " +
+		// Math.abs(red - redNew));
 
 		if (Math.abs(red - redNew) > LIMIT_BIT_TO_CHANGE) {
-			System.out.println("No Embed");
+			// System.out.println("No Embed");
 			return red;
 		}
 
@@ -276,18 +306,19 @@ public class SentSite {
 
 		checkGreenToChange++;
 
-		System.out.println("Embed");
-		System.out.println("increase: " + increase);
+		// System.out.println("Embed");
+		// System.out.println("increase: " + increase);
 
 		return redNew;
 	}
 
 	private static int changeBlue(int blue, int blueNew) {
 
-		System.out.println("Blue: " + blue + " BlueNew: " + blueNew + " Result: " + Math.abs(blue - blueNew));
+		// System.out.println("Blue: " + blue + " BlueNew: " + blueNew + " Result: " +
+		// Math.abs(blue - blueNew));
 
 		if (Math.abs(blue - blueNew) > LIMIT_BIT_TO_CHANGE) {
-			System.out.println("No Embed");
+			// System.out.println("No Embed");
 			return blue;
 		}
 
@@ -295,8 +326,8 @@ public class SentSite {
 
 		checkGreenToChange = checkGreenToChange + 2;
 
-		System.out.println("Embed");
-		System.out.println("increase: " + increase);
+		// System.out.println("Embed");
+		// System.out.println("increase: " + increase);
 
 		return blueNew;
 	}
